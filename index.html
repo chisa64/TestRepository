@@ -1,70 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics Playground - Final Try</title>
-    
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/cannon.js"></script>
-    
-    <script src="https://tamats.com/projects/litegraph/build/litegraph.min.js"></script>
-    <link rel="stylesheet" href="https://tamats.com/projects/litegraph/css/litegraph.css">
-
+    <title>Physics Playground</title>
     <style>
-        body, html { margin:0; padding:0; height:100%; overflow:hidden; background: #000; }
-        #canvas3d { width: 100%; height: 50%; display: block; }
-        #canvasGraph { width: 100%; height: 50%; display: block; }
-        button { position:absolute; top:52%; left:10px; z-index:100; padding: 20px; font-size: 18px; }
+        body, html { margin:0; padding:0; height:100%; overflow:hidden; }
+        #canvas3d { width: 100%; height: 50%; display:block; }
+        #canvasGraph { width: 100%; height: 50%; display:block; touch-action: none; }
     </style>
 </head>
 <body>
     <canvas id="canvas3d"></canvas>
     <canvas id="canvasGraph"></canvas>
-    <button onclick="addNode()">Add Node</button>
-
-    <script>
-        // ライブラリのグローバル登録を待機
-        function init() {
-            if (typeof LGraph === 'undefined') {
-                console.error("LiteGraph is still not loaded!");
-                return;
-            }
-
-            const graph = new LGraph();
-            const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
-
-            // Babylon.js設定
-            const engine = new BABYLON.Engine(document.getElementById("canvas3d"), true);
-            const scene = new BABYLON.Scene(engine);
-            scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
-            new BABYLON.ArcRotateCamera("cam", 0, 1, 15, BABYLON.Vector3.Zero(), scene).attachControl(document.getElementById("canvas3d"), true);
-            new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0,1,0), scene);
-            
-            engine.runRenderLoop(() => scene.render());
-
-            // 実行ノード
-            class ExecNode {
-                constructor() {
-                    this.addWidget("button", "▶️ Run", null, () => {
-                        const box = BABYLON.MeshBuilder.CreateBox("b", {size: 1}, scene);
-                        box.position.y = 5;
-                        box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
-                    });
-                }
-            }
-            LiteGraph.registerNodeType("game/execute", ExecNode);
-
-            window.addNode = () => {
-                const n = LiteGraph.createNode("game/execute");
-                n.pos = [50, 50];
-                graph.add(n);
-            };
-            graph.start();
-        }
-
-        // ロードを待って実行
-        window.onload = init;
-    </script>
+    <script type="module" src="/main.js"></script>
 </body>
 </html>
+、
