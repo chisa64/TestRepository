@@ -17,6 +17,11 @@
     </style>
 </head>
 <body>
+<div id="toolbar" style="position:fixed; top:5px; left:5px; z-index:100; pointer-events:auto;">
+    <button onclick="addNode('game/execute')">Exec Node</button>
+    <button onclick="addNode('basic/const')">Data Node</button>
+</div>
+
     <canvas id="canvas3d"></canvas>
     <canvas id="canvasGraph" width="1000" height="500"></canvas>
 
@@ -26,7 +31,7 @@ canvasGraph.allow_multi_selection = true;
 canvasGraph.capture_mouse = true;
 canvasGraph.capture_touch = true; // タッチ入力を有効化
 
-        // --- 3D Scene Setup ---
+       
         const canvas = document.getElementById("canvas3d");
         const engine = new BABYLON.Engine(canvas, true);
         const scene = new BABYLON.Scene(engine);
@@ -62,6 +67,13 @@ canvasGraph.capture_touch = true; // タッチ入力を有効化
         node.pos = [100, 100];
         graph.add(node);
         graph.start();
+        
+        function addNode(type) {
+    const node = LiteGraph.createNode(type);
+    node.pos = [50, 50]; // 画面左上に配置
+    graph.add(node);
+}
+
     </script>
 </body>
 </html>
