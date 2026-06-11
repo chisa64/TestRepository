@@ -21,6 +21,11 @@
     <canvas id="canvasGraph" width="1000" height="500"></canvas>
 
     <script>
+    // LiteGraphの入力設定を強化
+canvasGraph.allow_multi_selection = true;
+canvasGraph.capture_mouse = true;
+canvasGraph.capture_touch = true; // タッチ入力を有効化
+
         // --- 3D Scene Setup ---
         const canvas = document.getElementById("canvas3d");
         const engine = new BABYLON.Engine(canvas, true);
