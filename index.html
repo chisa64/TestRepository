@@ -27,6 +27,10 @@
     </div>
 
     <script>
+    window.onerror = function(msg, url, line) {
+    document.body.innerHTML = "<div style='color:red; padding:20px;'>ERROR: " + msg + " at line " + line + "</div>";
+};
+
         // 1. LiteGraphの初期化
         const graph = new LGraph();
         const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
