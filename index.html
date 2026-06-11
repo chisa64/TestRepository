@@ -2,49 +2,61 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Babylon.js Hello World</title>
-    <style>
-        body, canvas { width: 100%; height: 100%; margin: 0; display: block; }
-    </style>
-    <!-- Babylon.js エンジンを読み込む -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LiteGraph + BabylonJS Prototype</title>
+    
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <!-- GUI (テキスト用) を読み込む -->
-    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/cannon.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.35/litegraph.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/litegraph.js/0.7.35/css/litegraph.min.css">
+
+    <style>
+        body, html { margin:0; padding:0; height:100%; overflow:hidden; touch-action: none; }
+        #canvas3d { width: 100%; height: 50%; touch-action: none; }
+        #canvasGraph { width: 100%; height: 50%; background: #222; }
+    </style>
 </head>
 <body>
-    <canvas id="renderCanvas"></canvas>
+    <canvas id="canvas3d"></canvas>
+    <canvas id="canvasGraph" width="1000" height="500"></canvas>
+
     <script>
-        const canvas = document.getElementById("renderCanvas");
+        // --- 3D Scene Setup ---
+        const canvas = document.getElementById("canvas3d");
         const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+        scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.CannonJSPlugin());
+        
+        const camera = new BABYLON.ArcRotateCamera("cam", 0, 1, 15, BABYLON.Vector3.Zero(), scene);
+        camera.attachControl(canvas, true);
+        new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0,1,0), scene);
 
-        const createScene = () => {
-            const scene = new BABYLON.Scene(engine);
-            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 5, BABYLON.Vector3.Zero(), scene);
-            camera.attachControl(canvas, true);
-            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
+        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
 
-            // 箱を表示
-            const box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+        engine.runRenderLoop(() => scene.render());
 
-            // GUI (テキスト) を作成
-            const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-            const text = new BABYLON.GUI.TextBlock();
-            text.text = "Hello Babylon.js";
-            text.color = "white";
-            text.fontSize = 48;
-            advancedTexture.addControl(text);
+        // --- LiteGraph Setup ---
+        const graph = new LGraph();
+        const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
 
-            return scene;
-        };
+        // 実行ノード定義
+        function ExecNode() {
+            this.addInput("Settings", "object");
+            this.addWidget("button", "▶️ Run", null, () => {
+                const box = BABYLON.MeshBuilder.CreateBox("box", {size: 1}, scene);
+                box.position.y = 5;
+                box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
+            });
+        }
+        ExecNode.title = "Execute";
+        LiteGraph.registerNodeType("game/execute", ExecNode);
 
-        const scene = createScene();
-        engine.runRenderLoop(() => {
-            scene.render();
-        });
-
-        window.addEventListener("resize", () => {
-            engine.resize();
-        });
+        // ノード配置
+        const node = LiteGraph.createNode("game/execute");
+        node.pos = [100, 100];
+        graph.add(node);
+        graph.start();
     </script>
 </body>
 </html>
