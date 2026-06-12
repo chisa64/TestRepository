@@ -43,6 +43,29 @@
             gCanvas.width = gCanvas.clientWidth * window.devicePixelRatio;
             gCanvas.height = gCanvas.clientHeight * window.devicePixelRatio;
             canvasGraph.resize();
+            
+  // --- LiteGraphの初期化 ---
+const graph = new LGraph();
+const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
+canvasGraph.capture_touch = true; // タッチキャプチャを有効化
+
+// 【追加】iPad Safariのタッチ操作を完全にLiteGraphに紐付ける修正
+const gCanvas = document.getElementById("canvasGraph");
+
+// 1. CSSでブラウザのデフォルト挙動（スクロール・ズーム）を完全にオフにする
+gCanvas.style.touchAction = "none";
+gCanvas.style.webkitUserSelect = "none";
+
+// 2. タッチイベントが発生した際、ブラウザのスクロールを防止してLiteGraphに処理を渡す
+const preventDefault = (e) => { if (e.cancelable) e.preventDefault(); };
+gCanvas.addEventListener('touchstart', preventDefault, { passive: false });
+gCanvas.addEventListener('touchmove', preventDefault, { passive: false });
+
+// 解像度ズレの補正
+gCanvas.width = gCanvas.clientWidth * window.devicePixelRatio;
+gCanvas.height = gCanvas.clientHeight * window.devicePixelRatio;
+canvasGraph.resize();
+
 
             // --- Babylon.jsの初期化 ---
             const canvas3d = document.getElementById("canvas3d");
