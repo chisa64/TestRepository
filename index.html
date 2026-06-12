@@ -27,47 +27,36 @@
     </div>
 
     <script>
+        // 何かエラーが出た場合にiPad画面で気づけるようにする
+        window.onerror = (msg, url, line) => { alert("Error at line " + line + ": " + msg); };
+
         window.addEventListener('load', () => {
             if (typeof LGraph === 'undefined' || typeof BABYLON === 'undefined') {
-                alert("ライブラリの読み込みに失敗しました。電波状況を確認してください。");
+                alert("ライブラリの読み込みに失敗しました。");
                 return;
             }
 
-            // --- LiteGraphの初期化 ---
+            // --- 1. LiteGraphの初期化とiPadタッチ対策 ---
             const graph = new LGraph();
             const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
-            canvasGraph.capture_touch = true; // iPadのタッチ対応
+            canvasGraph.capture_touch = true; // LiteGraph側のタッチ有効化
+
+            const gCanvas = document.getElementById("canvasGraph");
+            
+            // Safariのデフォルトスクロール・選択挙動を完全にブロック
+            gCanvas.style.touchAction = "none";
+            gCanvas.style.webkitUserSelect = "none";
+
+            const preventDefault = (e) => { if (e.cancelable) e.preventDefault(); };
+            gCanvas.addEventListener('touchstart', preventDefault, { passive: false });
+            gCanvas.addEventListener('touchmove', preventDefault, { passive: false });
 
             // 解像度ズレの補正
-            const gCanvas = document.getElementById("canvasGraph");
             gCanvas.width = gCanvas.clientWidth * window.devicePixelRatio;
             gCanvas.height = gCanvas.clientHeight * window.devicePixelRatio;
             canvasGraph.resize();
-            
-  // --- LiteGraphの初期化 ---
-const graph = new LGraph();
-const canvasGraph = new LGraphCanvas("#canvasGraph", graph);
-canvasGraph.capture_touch = true; // タッチキャプチャを有効化
 
-// 【追加】iPad Safariのタッチ操作を完全にLiteGraphに紐付ける修正
-const gCanvas = document.getElementById("canvasGraph");
-
-// 1. CSSでブラウザのデフォルト挙動（スクロール・ズーム）を完全にオフにする
-gCanvas.style.touchAction = "none";
-gCanvas.style.webkitUserSelect = "none";
-
-// 2. タッチイベントが発生した際、ブラウザのスクロールを防止してLiteGraphに処理を渡す
-const preventDefault = (e) => { if (e.cancelable) e.preventDefault(); };
-gCanvas.addEventListener('touchstart', preventDefault, { passive: false });
-gCanvas.addEventListener('touchmove', preventDefault, { passive: false });
-
-// 解像度ズレの補正
-gCanvas.width = gCanvas.clientWidth * window.devicePixelRatio;
-gCanvas.height = gCanvas.clientHeight * window.devicePixelRatio;
-canvasGraph.resize();
-
-
-            // --- Babylon.jsの初期化 ---
+            // --- 2. Babylon.jsの初期化 ---
             const canvas3d = document.getElementById("canvas3d");
             const engine = new BABYLON.Engine(canvas3d, true);
             const scene = new BABYLON.Scene(engine);
@@ -85,11 +74,10 @@ canvasGraph.resize();
 
             engine.runRenderLoop(() => scene.render());
 
-            // --- カスタムノードの定義 ---
+            // --- 3. カスタムノードの定義 ---
             function ExecNode() {
                 this.addInput("In", "");
                 this.addWidget("button", "▶️ Run", null, () => {
-                    // ボタンを押したら3D空間に箱を落とす
                     const box = BABYLON.MeshBuilder.CreateBox("box", {size: 1}, scene);
                     box.position.y = 7;
                     box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
